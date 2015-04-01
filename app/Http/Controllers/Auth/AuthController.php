@@ -1,5 +1,6 @@
 <?php namespace App\Http\Controllers\Auth;
 
+use App\Models\User;
 use App\Http\Controllers\Controller;
 use Facebook\FacebookRedirectLoginHelper;
 use Facebook\FacebookRequest;
@@ -87,20 +88,18 @@ class AuthController extends Controller {
 				
 				echo "Email: " . $user_profile->getEmail();
 				
-				$user_profile->getBirthday();
-				$user_profile->getFavoriteTeams();
-				
-//				first_name
-//				last_name
-//				gender
-//				location
-//				relationship_status
-//				sports
-//				timezone
-//				verified
-
-				
 				var_dump($user_profile);
+				
+				$user = new User();
+				$user->name = $user_profile->getName();
+				$user->email = $user_profile->getEmail();
+				$user->dt_nascimento = $user_profile->getBirthday();
+				$user->sexo = $user_profile->getGender();
+				//$user->location = $user_profile->getLocation()->name;
+				//$user->relationshipStatus = $user_profile->getRelationshipStatus();
+				
+				$user->save();
+				
 			}
 		} catch(FacebookRequestException $ex) {
 			echo $ex->getMessage();
