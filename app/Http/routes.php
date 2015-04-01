@@ -29,4 +29,6 @@ Route::get('facebook-login', function()
     return View::make('facebook_login');
 });
 
-Route::get('login', 'Auth\AuthController@loginWithFacebook');
+Route::get('do-login-facebook', 'Auth\AuthController@loginWithFacebook');
+
+Route::get('return-facebook-login', 'Auth\AuthController@returnOfFacebookLogin');

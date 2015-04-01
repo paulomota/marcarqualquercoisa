@@ -52,9 +52,11 @@
 								<a class="btn btn-link" href="{{ url('/password/email') }}">Forgot Your Password?</a>
 							</div>
 						</div>
-
+					</form>
+					<form class="form-horizontal" role="form" method="GET" action="{{ url('/do-login-facebook') }}">
+						<input type="hidden" name="_token" value="{{ csrf_token() }}">
 						<div>
-							<a href="{{ $facebookLoginUrl }}" class="btn btn-link">Login com Facebook</a>
+							<button type="submit" class="btn btn-primary">Login com facebook</button>
 						</div>
 					</form>
 				</div>
