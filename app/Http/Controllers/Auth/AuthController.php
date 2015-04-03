@@ -1,7 +1,7 @@
 <?php namespace App\Http\Controllers\Auth;
 
-use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Facebook\FacebookRedirectLoginHelper;
 use Facebook\FacebookRequest;
 use Facebook\FacebookRequestException;
@@ -10,20 +10,11 @@ use Facebook\GraphUser;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Routing\Registrar;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
+use Illuminate\View\View;
 
 class AuthController extends Controller {
-
-	/*
-	|--------------------------------------------------------------------------
-	| Registration & Login Controller
-	|--------------------------------------------------------------------------
-	|
-	| This controller handles the registration of new users, as well as the
-	| authentication of existing users. By default, this controller uses
-	| a simple trait to add these behaviors. Why don't you explore it?
-	|
-	*/
 
 	use AuthenticatesAndRegistersUsers;
 	
@@ -42,8 +33,7 @@ class AuthController extends Controller {
 	 * @param  Registrar  $registrar
 	 * @return void
 	 */
-	public function __construct(Guard $auth, Registrar $registrar)
-	{
+	public function __construct(Guard $auth, Registrar $registrar){
 		$this->auth = $auth;
 		$this->registrar = $registrar;
 
@@ -51,9 +41,7 @@ class AuthController extends Controller {
 	}
 
 	public function loginWithFacebook(){
-		echo "login with facebook - ";
-		
-		$redirect_url = URL::to('/') . '/return-facebook-login';
+		$redirect_url = URL::to('/') . '/return-fb-login';
 		
 		session_start();
 		
@@ -61,15 +49,13 @@ class AuthController extends Controller {
 		
 		$permissionsList = 'user_friends,email,user_birthday,user_likes,user_location,user_relationships';
 		
-		echo $helper->getLoginUrl().$permissionsList;
+		$params = array('url_login_fb' => $helper->getLoginUrl().$permissionsList);
 		
-		echo '<a href="' . $helper->getLoginUrl().$permissionsList. '">Login with Facebook</a>';
+		return View('auth/login')->with($params);
 	}
 
 	public function returnOfFacebookLogin(){
-		echo "chegou";
-		
-		$redirect_url = URL::to('/') . '/return-facebook-login';
+		$redirect_url = URL::to('/') . '/return-fb-login';
 		
 		session_start();
 		
@@ -80,25 +66,27 @@ class AuthController extends Controller {
 			$session = $helper->getSessionFromRedirect();
 			
 			if ($session) {
-				echo 'tem sessao mano!';
-				
 				$user_profile = (new FacebookRequest($session, 'GET', '/me'))->execute()->getGraphObject(GraphUser::className());
 
-				echo "Name: " . $user_profile->getName();
+				$userRetrieved = User::where('email', '=', $user_profile->getEmail())->first();
 				
-				echo "Email: " . $user_profile->getEmail();
-				
-				var_dump($user_profile);
+				if($userRetrieved != null){
+					echo 'usuario ja existe - ';
+					return self::authenticate($userRetrieved);
+				}
 				
 				$user = new User();
 				$user->name = $user_profile->getName();
 				$user->email = $user_profile->getEmail();
+				$user->password = bcrypt($user_profile->getEmail());
 				$user->dt_nascimento = $user_profile->getBirthday();
 				$user->sexo = $user_profile->getGender();
 				//$user->location = $user_profile->getLocation()->name;
 				//$user->relationshipStatus = $user_profile->getRelationshipStatus();
 				
 				$user->save();
+				
+				return self::authenticate($user);
 				
 			}
 		} catch(FacebookRequestException $ex) {
@@ -107,20 +95,11 @@ class AuthController extends Controller {
 			echo $ex->getMessage();
 		}
 		
-//		$session = new FacebookSession($acessToken);
-//		
-//		if($session) {
-//			try {
-//			  $user_profile = (new FacebookRequest($session, 'GET', '/me'))->execute()->getGraphObject(GraphUser::className());
-//
-//			  echo "Name: " . $user_profile->getName();
-//
-//			} catch(FacebookRequestException $e) {
-//
-//			  echo "Exception occured, code: " . $e->getCode();
-//			  echo " with message: " . $e->getMessage();
-//
-//			}   
-//		}
+	}
+	
+	public function authenticate(User $user){
+		if (Auth::attempt(['email' => $user->email, 'password' => $user->email])){
+			return redirect()->intended('/');
+		}
 	}
 }

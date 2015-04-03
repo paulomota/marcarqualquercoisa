@@ -1,7 +1,5 @@
 <?php
 
-
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -12,10 +10,9 @@
 | and give it the controller to call when that URI is requested.
 |
 */
+Route::get('auth/login', array('before' => 'old', 'uses' => 'Auth\AuthController@loginWithFacebook'));
 
-Route::get('/', 'WelcomeController@index');
-
-Route::get('home', 'HomeController@index');
+Route::get('/', 'HomeController@index');
 
 Route::controllers([
 	'auth' => 'Auth\AuthController',
@@ -24,11 +21,10 @@ Route::controllers([
 
 Route::get('users', 'UserController@all');
 
-Route::get('facebook-login', function()
-{
+Route::get('fb-login', function(){
     return View::make('facebook_login');
 });
 
-Route::get('do-login-facebook', 'Auth\AuthController@loginWithFacebook');
+Route::get('do-login-fb', 'Auth\AuthController@loginWithFacebook');
 
-Route::get('return-facebook-login', 'Auth\AuthController@returnOfFacebookLogin');
+Route::get('return-fb-login', 'Auth\AuthController@returnOfFacebookLogin');

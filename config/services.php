@@ -33,5 +33,11 @@ return [
 		'model'  => 'App\User',
 		'secret' => '',
 	],
+	
+	'facebook' => [
+		'app_id' => '671882166250138',
+		'app_key' => 'dd517df6535a74a189ed90f2dd84111d',
+		'redirect' => 'http://your-callback-url',
+	],
 
 ];
